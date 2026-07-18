@@ -15,7 +15,9 @@ export default auth((req) => {
   const session = req.auth;
 
   if (!session && pathname !== "/login") {
-    return NextResponse.redirect(new URL("/login", req.url));
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    return NextResponse.redirect(loginUrl);
   }
 
   if (session) {
@@ -23,10 +25,14 @@ export default auth((req) => {
       pathname.startsWith(route)
     );
     if (allowedRoles && !allowedRoles[1].includes(session.user?.role as string)) {
-      return NextResponse.redirect(new URL("/", req.url));
+      const homeUrl = req.nextUrl.clone();
+      homeUrl.pathname = "/";
+      return NextResponse.redirect(homeUrl);
     }
     if (session.user?.role === "staff" && !pathname.startsWith("/scheduling")) {
-      return NextResponse.redirect(new URL("/scheduling", req.url));
+      const schedulingUrl = req.nextUrl.clone();
+      schedulingUrl.pathname = "/scheduling";
+      return NextResponse.redirect(schedulingUrl);
     }
   }
 
