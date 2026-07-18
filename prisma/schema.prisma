@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  manager
+  cs
+  front_office
+  staff
+}
+
+enum PatientStatus {
+  new
+  repeat
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+}
+
+enum DiscountType {
+  percentage
+  fixed_amount
+}
+
+enum StaffRole {
+  doctor
+  beautician
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  bookings    Booking[]
+  transaction Transaction[]
+  staff       Staff?
+
+  @@map("users")
+}
+
+model Customer {
+  id                  String        @id @default(cuid())
+  name                String
+  whatsapp            String
+  birthDate           DateTime?     @map("birth_date")
+  acquisitionChannel  String?       @map("acquisition_channel")
+  status              PatientStatus @default(new)
+  interestedTreatment String?       @map("interested_treatment")
+  bookingSuccess      Boolean?      @default(false) @map("booking_success")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  bookings   Booking[]
+  membership Membership?
+  complaints Complaint[]
+
+  @@map("customers")
+}
+
+model Treatment {
+  id       String  @id @default(cuid())
+  name     String
+  price    Decimal @db.Decimal(12, 2)
+  category String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bookingTreatment BookingTreatment[]
+
+  @@map("treatments")
+}
+
+model Staff {
+  id             String   @id @default(cuid())
+  name           String
+  role           StaffRole
+  commissionRate Decimal  @map("commission_rate") @db.Decimal(10, 2)
+  userId         String?  @unique @map("user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user             User?              @relation(fields: [userId], references: [id])
+  bookingTreatment BookingTreatment[]
+
+  @@map("staff")
+}
+
+model Booking {
+  id               String   @id @default(cuid())
+  customerId       String   @map("customer_id")
+  scheduledDate    DateTime @map("scheduled_date")
+  notes            String?
+  packagePurchased Boolean  @default(false) @map("package_purchased")
+  createdById      String   @map("created_by")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  customer         Customer           @relation(fields: [customerId], references: [id])
+  createdBy        User               @relation(fields: [createdById], references: [id])
+  bookingTreatment BookingTreatment[]
+  transaction      Transaction?
+
+  @@index([customerId])
+  @@index([createdById])
+  @@map("bookings")
+}
+
+model BookingTreatment {
+  id             String        @id @default(cuid())
+  bookingId      String        @map("booking_id")
+  treatmentId    String        @map("treatment_id")
+  staffId        String        @map("staff_id")
+  priceAtBooking Decimal       @map("price_at_booking") @db.Decimal(12, 2)
+  discountType   DiscountType?
+  discountAmount Decimal?      @map("discount_amount") @db.Decimal(12, 2)
+  paymentStatus  PaymentStatus  @default(unpaid) @map("payment_status")
+  commissionAmount Decimal?    @map("commission_amount") @db.Decimal(12, 2)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  treatment Treatment @relation(fields: [treatmentId], references: [id], onDelete: Restrict)
+  staff     Staff     @relation(fields: [staffId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([treatmentId])
+  @@index([staffId])
+  @@map("booking_treatments")
+}
+
+model Transaction {
+  id            String    @id @default(cuid())
+  bookingId     String    @unique @map("booking_id")
+  paidAt        DateTime  @map("paid_at")
+  nextVisitDate DateTime? @map("next_visit_date")
+  editedById    String?   @map("edited_by")
+  editNotes     String?   @map("edit_notes")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  editedBy User?   @relation(fields: [editedById], references: [id])
+
+  @@index([bookingId])
+  @@index([editedById])
+  @@map("transactions")
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  customerId     String   @unique @map("customer_id")
+  totalSpent     Decimal  @default(0) @map("total_spent") @db.Decimal(12, 2)
+  memberSince    DateTime @default(now()) @map("member_since")
+  thresholdMetAt DateTime? @map("threshold_met_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("memberships")
+}
+
+model Complaint {
+  id              String   @id @default(cuid())
+  customerId      String   @map("customer_id")
+  chronologyNotes String?  @map("chronology_notes")
+  photoBeforeUrl  String?  @map("photo_before_url")
+  photoAfterUrl   String?  @map("photo_after_url")
+  resolution      String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("complaints")
+}
