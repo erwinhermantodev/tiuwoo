@@ -19,7 +19,7 @@ export function LoginForm() {
 
   return (
     <form
-      action="/api/auth/callback/credentials"
+      action="/api/auth/callback/credentials?callbackUrl=/leads"
       method="POST"
       className="space-y-4"
     >

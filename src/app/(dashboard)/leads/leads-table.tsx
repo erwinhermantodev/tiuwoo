@@ -111,9 +111,7 @@ export function LeadsTable({ leads, role }: { leads: Lead[]; role: string }) {
     <div>
       <div className="flex justify-end mb-4">
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger>
-            <Button>Add Lead</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button>Add Lead</Button>} />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Lead" : "New Lead"}</DialogTitle>

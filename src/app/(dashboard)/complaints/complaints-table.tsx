@@ -120,9 +120,7 @@ export function ComplaintsTable({ complaints, customers, role }: Props) {
     <div>
       <div className="flex justify-end mb-4">
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger>
-            <Button disabled={!canEdit}>Add Complaint</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button disabled={!canEdit}>Add Complaint</Button>} />
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Complaint" : "New Complaint"}</DialogTitle>

@@ -87,9 +87,7 @@ export function TransactionsTable({ transactions, unpaidBookings, role }: Props)
     <div>
       <div className="flex justify-end mb-4">
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger>
-            <Button disabled={!canEdit || unpaidBookings.length === 0}>Mark Payment</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button disabled={!canEdit || unpaidBookings.length === 0}>Mark Payment</Button>} />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Record Payment</DialogTitle>

@@ -98,9 +98,7 @@ export function StaffTable({ staff, users }: Props) {
     <div>
       <div className="flex justify-end mb-4">
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger>
-            <Button>Add Staff</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button>Add Staff</Button>} />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Staff" : "New Staff"}</DialogTitle>
