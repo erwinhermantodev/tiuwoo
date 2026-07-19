@@ -1,35 +1,18 @@
-import NextAuth from "next-auth";
+import { getToken } from "next-auth/jwt";
 
-declare module "next-auth" {
-  interface User {
-    role?: string;
-  }
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role: string;
-    };
-  }
-}
-
-export const { auth } = NextAuth({
-  providers: [],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
+export async function getServerSession(req: Request) {
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  return token
+    ? {
+        user: {
+          id: token.id as string,
+          email: token.email as string,
+          name: token.name as string,
+          role: token.role as string,
+        },
       }
-      return token;
-    },
-    async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.role = token.role as string;
-      return session;
-    },
-  },
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
-});
+    : null;
+}

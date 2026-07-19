@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth.edge";
-import { NextResponse } from "next/server";
+import { getServerSession } from "@/lib/auth.edge";
+import { NextRequest, NextResponse } from "next/server";
 
 const roleRoutes: Record<string, string[]> = {
   "/leads": ["manager", "cs"],
@@ -10,9 +10,9 @@ const roleRoutes: Record<string, string[]> = {
   "/staff": ["manager"],
 };
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const session = req.auth;
+  const session = await getServerSession(req as unknown as Request);
 
   if (!session && pathname !== "/login") {
     const loginUrl = req.nextUrl.clone();
@@ -37,7 +37,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
