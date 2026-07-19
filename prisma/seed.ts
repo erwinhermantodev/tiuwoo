@@ -3,10 +3,16 @@ config({ path: ".env.local" });
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
+import { parse } from "pg-connection-string";
 import { hash } from "bcrypt-ts";
 
+const connectionConfig = parse(process.env.DATABASE_URL!);
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: connectionConfig.host ?? undefined,
+  port: connectionConfig.port ? parseInt(connectionConfig.port) : undefined,
+  database: connectionConfig.database ?? undefined,
+  user: connectionConfig.user ?? undefined,
+  password: connectionConfig.password ?? undefined,
   ssl: { rejectUnauthorized: false },
 });
 const adapter = new PrismaPg(pool);
