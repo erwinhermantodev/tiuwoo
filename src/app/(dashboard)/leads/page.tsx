@@ -11,7 +11,7 @@ export default async function LeadsPage() {
   const leads = await prisma.customer.findMany({ orderBy: { createdAt: "desc" } });
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Leads / Customer Profiles</h1>
+      <h1 className="font-heading text-[26px] font-medium">Leads / Customer Profiles</h1>
       <LeadsTable leads={JSON.parse(JSON.stringify(leads))} role={session.user?.role as string} />
     </div>
   );

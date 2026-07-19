@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen">
       <Sidebar role={session.user?.role as string} />
-      <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <main className="flex-1 overflow-y-auto p-8 bg-[#FBF6F2]">{children}</main>
     </div>
   );
 }

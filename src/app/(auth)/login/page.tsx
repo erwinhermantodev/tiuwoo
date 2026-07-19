@@ -8,13 +8,13 @@ export default async function LoginPage() {
   if (session) redirect("/leads");
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-[#FBF6F2]">
       <div className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold text-center">Tiuwoo</h1>
-        <p className="text-muted-foreground text-center text-sm">
+        <h1 className="font-[family-name:var(--font-display)] italic text-4xl font-medium text-center text-[#2B2420]">Tiuwoo</h1>
+        <p className="text-[#4A4038] text-center text-sm">
           Sign in to your account
         </p>
-        <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
+        <Suspense fallback={<div className="text-center text-sm text-[#4A4038]">Loading...</div>}>
           <LoginForm />
         </Suspense>
       </div>

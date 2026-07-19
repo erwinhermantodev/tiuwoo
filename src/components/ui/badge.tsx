@@ -27,6 +27,23 @@ const badgeVariants = cva(
   }
 )
 
+const pillVariants = cva(
+  "inline-flex items-center gap-[6px] rounded-[999px] px-3 py-[5px] text-xs font-semibold",
+  {
+    variants: {
+      color: {
+        sage: "bg-[#E7ECE0] text-[#4E5C43]",
+        clay: "bg-[#F5E3D5] text-[#8A4E27]",
+        blush: "bg-[#F6E3E1] text-[#8E4A50]",
+        taupe: "bg-[#EFE7E1] text-[#4A4038]",
+      },
+    },
+    defaultVariants: {
+      color: "taupe",
+    },
+  }
+)
+
 function Badge({
   className,
   variant = "default",
@@ -49,4 +66,29 @@ function Badge({
   })
 }
 
-export { Badge, badgeVariants }
+function Pill({
+  className,
+  color = "taupe",
+  dot = true,
+  children,
+  ...props
+}: React.ComponentProps<"span"> & VariantProps<typeof pillVariants> & { dot?: boolean }) {
+  return (
+    <span className={cn(pillVariants({ color }), className)} {...props}>
+      {dot && (
+        <span
+          className={cn(
+            "size-[6px] rounded-full shrink-0",
+            color === "sage" && "bg-[#4E5C43]",
+            color === "clay" && "bg-[#8A4E27]",
+            color === "blush" && "bg-[#8E4A50]",
+            color === "taupe" && "bg-[#B8ABA0]",
+          )}
+        />
+      )}
+      {children}
+    </span>
+  )
+}
+
+export { Badge, badgeVariants, Pill }

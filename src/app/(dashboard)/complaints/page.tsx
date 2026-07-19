@@ -16,7 +16,7 @@ export default async function ComplaintsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Complaints</h1>
+      <h1 className="font-heading text-[26px] font-medium">Complaints</h1>
       <ComplaintsTable
         complaints={JSON.parse(JSON.stringify(complaints))}
         customers={JSON.parse(JSON.stringify(customers))}

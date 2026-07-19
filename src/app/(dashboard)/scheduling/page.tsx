@@ -18,7 +18,7 @@ export default async function SchedulingPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Scheduling</h1>
+      <h1 className="font-heading text-[26px] font-medium">Scheduling</h1>
       <SchedulingCalendar
         bookings={JSON.parse(JSON.stringify(bookings))}
         treatments={JSON.parse(JSON.stringify(treatments))}

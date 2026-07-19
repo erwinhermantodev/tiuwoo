@@ -33,7 +33,7 @@ export default async function TransactionsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Transactions</h1>
+      <h1 className="font-heading text-[26px] font-medium">Transactions</h1>
       <TransactionsTable
         transactions={JSON.parse(JSON.stringify(transactions))}
         unpaidBookings={JSON.parse(JSON.stringify(unpaidBookings))}

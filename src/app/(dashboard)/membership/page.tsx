@@ -41,7 +41,7 @@ export default async function MembershipPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Membership</h1>
+      <h1 className="font-heading text-[26px] font-medium">Membership</h1>
       <MembershipTable memberships={JSON.parse(JSON.stringify(memberships))} />
     </div>
   );
