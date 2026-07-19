@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -27,7 +27,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { Pill } from "@/components/ui/badge";
+import { Plus } from "lucide-react";
 import { format } from "date-fns";
 
 type Lead = {
@@ -42,10 +43,13 @@ type Lead = {
   createdAt: string;
 };
 
+const filters = ["All", "New", "Repeat", "Not booked"] as const;
+
 export function LeadsTable({ leads, role }: { leads: Lead[]; role: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>("All");
   const [form, setForm] = useState({
     name: "",
     whatsapp: "",
@@ -55,6 +59,21 @@ export function LeadsTable({ leads, role }: { leads: Lead[]; role: string }) {
     interestedTreatment: "",
     bookingSuccess: false,
   });
+
+  const filteredLeads = useMemo(() => {
+    if (activeFilter === "All") return leads;
+    if (activeFilter === "New") return leads.filter((l) => l.status === "new" && !l.bookingSuccess);
+    if (activeFilter === "Repeat") return leads.filter((l) => l.status === "repeat");
+    if (activeFilter === "Not booked") return leads.filter((l) => !l.bookingSuccess);
+    return leads;
+  }, [leads, activeFilter]);
+
+  const counts = useMemo(() => ({
+    All: leads.length,
+    New: leads.filter((l) => l.status === "new" && !l.bookingSuccess).length,
+    Repeat: leads.filter((l) => l.status === "repeat").length,
+    "Not booked": leads.filter((l) => !l.bookingSuccess).length,
+  }), [leads]);
 
   function resetForm() {
     setForm({
@@ -109,34 +128,54 @@ export function LeadsTable({ leads, role }: { leads: Lead[]; role: string }) {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex gap-2">
+          {filters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setActiveFilter(f)}
+              className={`text-[12px] font-semibold px-3.5 py-1.5 rounded-[999px] border transition-colors ${
+                activeFilter === f
+                  ? "bg-[#8E4A50] text-[#FBF3F1] border-[#8E4A50]"
+                  : "bg-white text-[#4A4038] border-[#E6DAD3] hover:bg-[#EFE7E1]"
+              }`}
+            >
+              {f} · {counts[f as keyof typeof counts]}
+            </button>
+          ))}
+        </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger render={<Button>Add Lead</Button>} />
+          <DialogTrigger render={
+            <Button size="pill" className="bg-[#8E4A50] text-[#FBF3F1] hover:bg-[#8E4A50]/80 border-none rounded-[999px]">
+              <Plus className="size-4" />
+              Add lead
+            </Button>
+          } />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Lead" : "New Lead"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                <Label htmlFor="lf-name">Name</Label>
+                <Input id="lf-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="rounded-[6px] border-[#B8ABA0]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="whatsapp">WhatsApp</Label>
-                <Input id="whatsapp" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} required />
+                <Label htmlFor="lf-whatsapp">WhatsApp</Label>
+                <Input id="lf-whatsapp" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} required className="rounded-[6px] border-[#B8ABA0]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="birthDate">Birth Date</Label>
-                <Input id="birthDate" type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
+                <Label htmlFor="lf-birth">Birth Date</Label>
+                <Input id="lf-birth" type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} className="rounded-[6px] border-[#B8ABA0]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="acquisitionChannel">Acquisition Channel</Label>
-                <Input id="acquisitionChannel" value={form.acquisitionChannel} onChange={(e) => setForm({ ...form, acquisitionChannel: e.target.value })} />
+                <Label htmlFor="lf-channel">Acquisition Channel</Label>
+                <Input id="lf-channel" value={form.acquisitionChannel} onChange={(e) => setForm({ ...form, acquisitionChannel: e.target.value })} className="rounded-[6px] border-[#B8ABA0]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="lf-status">Status</Label>
                 <Select value={form.status} onValueChange={(v) => v && setForm({ ...form, status: v as "new" | "repeat" })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="rounded-[6px] border-[#B8ABA0]"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="new">New</SelectItem>
                     <SelectItem value="repeat">Repeat</SelectItem>
@@ -144,10 +183,14 @@ export function LeadsTable({ leads, role }: { leads: Lead[]; role: string }) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="interestedTreatment">Interested Treatment</Label>
-                <Input id="interestedTreatment" value={form.interestedTreatment} onChange={(e) => setForm({ ...form, interestedTreatment: e.target.value })} />
+                <Label htmlFor="lf-treatment">Interested Treatment</Label>
+                <Input id="lf-treatment" value={form.interestedTreatment} onChange={(e) => setForm({ ...form, interestedTreatment: e.target.value })} className="rounded-[6px] border-[#B8ABA0]" />
               </div>
-              <Button type="submit">{editing ? "Update" : "Create"}</Button>
+              <div className="pt-1">
+                <Button type="submit" size="pill" className="w-full justify-center bg-[#8E4A50] text-[#FBF3F1] hover:bg-[#8E4A50]/80 border-none rounded-[999px]">
+                  {editing ? "Update" : "Create"}
+                </Button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>
@@ -158,35 +201,37 @@ export function LeadsTable({ leads, role }: { leads: Lead[]; role: string }) {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>WhatsApp</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Channel</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Interested in</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {leads.map((lead) => (
+          {filteredLeads.map((lead) => (
             <TableRow key={lead.id}>
               <TableCell className="font-medium">{lead.name}</TableCell>
-              <TableCell>{lead.whatsapp}</TableCell>
-              <TableCell>
-                <Badge variant={lead.status === "new" ? "secondary" : "default"}>
-                  {lead.status}
-                </Badge>
-              </TableCell>
+              <TableCell className="font-[family-name:var(--font-mono)] text-[12.5px]">{lead.whatsapp}</TableCell>
               <TableCell>{lead.acquisitionChannel || "-"}</TableCell>
-              <TableCell>{format(new Date(lead.createdAt), "dd MMM yyyy")}</TableCell>
-              <TableCell className="space-x-2">
-                <Button variant="outline" size="sm" onClick={() => openEdit(lead)}>Edit</Button>
-                {role === "manager" && (
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(lead.id)}>Delete</Button>
-                )}
+              <TableCell>{lead.interestedTreatment || "-"}</TableCell>
+              <TableCell>
+                <Pill color={lead.status === "new" ? "taupe" : "blush"}>
+                  {lead.status === "new" ? "New" : "Repeat"}
+                </Pill>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <button onClick={() => openEdit(lead)} className="text-[12px] text-[#B8ABA0] hover:text-[#4A4038] transition-colors">Edit</button>
+                  {role === "manager" && (
+                    <button onClick={() => handleDelete(lead.id)} className="text-[12px] text-[#B8ABA0] hover:text-[#C97B4E] transition-colors">Delete</button>
+                  )}
+                </div>
               </TableCell>
             </TableRow>
           ))}
-          {leads.length === 0 && (
+          {filteredLeads.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">No leads yet</TableCell>
+              <TableCell colSpan={6} className="text-center text-[#4A4038] py-8">No leads yet</TableCell>
             </TableRow>
           )}
         </TableBody>

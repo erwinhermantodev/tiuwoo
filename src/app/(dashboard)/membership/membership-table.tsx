@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Pill } from "@/components/ui/badge";
 import { format } from "date-fns";
 
 const THRESHOLD = 500;
@@ -28,11 +28,10 @@ export function MembershipTable({ memberships }: { memberships: MembershipRow[] 
       <TableHeader>
         <TableRow>
           <TableHead>Customer</TableHead>
-          <TableHead>WhatsApp</TableHead>
-          <TableHead>Total Spent</TableHead>
-          <TableHead>Member Since</TableHead>
+          <TableHead>Total spent</TableHead>
           <TableHead>Threshold</TableHead>
           <TableHead>Progress</TableHead>
+          <TableHead>Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -42,30 +41,37 @@ export function MembershipTable({ memberships }: { memberships: MembershipRow[] 
           return (
             <TableRow key={m.customerId}>
               <TableCell className="font-medium">{m.customerName}</TableCell>
-              <TableCell>{m.customerWhatsapp}</TableCell>
-              <TableCell>${m.totalSpent.toFixed(2)}</TableCell>
-              <TableCell>
-                {m.memberSince ? format(new Date(m.memberSince), "dd MMM yyyy") : "-"}
+              <TableCell className="font-[family-name:var(--font-mono)] text-[12.5px]">
+                Rp {m.totalSpent.toLocaleString()}
+              </TableCell>
+              <TableCell className="font-[family-name:var(--font-mono)] text-[12.5px]">
+                Rp {THRESHOLD.toLocaleString()}
               </TableCell>
               <TableCell>
-                <Badge variant={met ? "default" : "secondary"}>
-                  {met ? "Met" : `${(THRESHOLD - m.totalSpent).toFixed(2)} remaining`}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="w-full bg-muted rounded-full h-2">
+                <div className="h-[6px] rounded-[999px] bg-[#EFE7E1] overflow-hidden w-[110px]">
                   <div
-                    className="bg-primary h-2 rounded-full transition-all"
+                    className="h-full rounded-[999px] bg-[#4E5C43] transition-all"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
+              </TableCell>
+              <TableCell>
+                {met ? (
+                  <Pill color="sage">
+                    {m.memberSince ? `Member since ${format(new Date(m.memberSince), "MMM ''yy")}` : "Member"}
+                  </Pill>
+                ) : progress > 50 ? (
+                  <Pill color="clay">{progress}% to go</Pill>
+                ) : (
+                  <Pill color="taupe">{progress}% to go</Pill>
+                )}
               </TableCell>
             </TableRow>
           );
         })}
         {memberships.length === 0 && (
           <TableRow>
-            <TableCell colSpan={6} className="text-center text-muted-foreground">No customers found</TableCell>
+            <TableCell colSpan={5} className="text-center text-[#4A4038] py-8">No customers found</TableCell>
           </TableRow>
         )}
       </TableBody>
